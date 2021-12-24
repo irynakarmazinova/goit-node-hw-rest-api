@@ -10,16 +10,20 @@ const { NotFound, BadRequest } = require("http-errors");
 
 const contactsOperations = require("../../model");
 
+// const { joiSchema } = require("../../src/middlewares/validationMiddleware");
 const joiSchema = Joi.object({
-  name: Joi.string().required(),
+  name: Joi.string().min(3).max(30).required(),
   email: Joi.string().required(),
-  phone: Joi.string().required(),
+  phone: Joi.string(),
 });
 
 // получить все
+// app.use("/api/contacts/...
 router.get("/", async (req, res, next) => {
   try {
     const contacts = await contactsOperations.listContacts();
+    console.log(contacts);
+
     res.json(contacts);
   } catch (error) {
     next(error);
@@ -28,6 +32,7 @@ router.get("/", async (req, res, next) => {
 });
 
 // получить по id
+// app.use("/api/contacts/id...
 router.get("/:contactId", async (req, res, next) => {
   const { contactId } = req.params;
 
@@ -120,4 +125,4 @@ router.delete("/:contactId", async (req, res, next) => {
   }
 });
 
-module.exports = router;
+module.exports = { contactsRouter: router };
