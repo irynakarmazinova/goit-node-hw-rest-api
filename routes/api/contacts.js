@@ -1,5 +1,8 @@
-const express = require("express");
-const router = express.Router();
+const { Router } = require("express");
+const router = Router();
+// const express = require("express");
+// const router = express.Router();
+
 const Joi = require("joi");
 
 // const createError = require("http-errors");
@@ -13,6 +16,7 @@ const joiSchema = Joi.object({
   phone: Joi.string().required(),
 });
 
+// получить все
 router.get("/", async (req, res, next) => {
   try {
     const contacts = await contactsOperations.listContacts();
@@ -23,11 +27,12 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/:id", async (req, res, next) => {
-  const { id } = req.params;
+// получить по id
+router.get("/:contactId", async (req, res, next) => {
+  const { contactId } = req.params;
 
   try {
-    const contact = await contactsOperations.getContactById(id);
+    const contact = await contactsOperations.getContactById(contactId);
 
     if (!contact) {
       throw new NotFound();
@@ -44,8 +49,10 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
+// добавить
 router.post("/", async (req, res, next) => {
-  const body = req.body;
+  const { body } = req;
+  // const body = req.body;
 
   try {
     const { error } = joiSchema.validate(body);
@@ -63,9 +70,10 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-router.put("/:id", async (req, res, next) => {
-  const body = req.body;
-  const { id } = req.params;
+// обновить
+router.put("/:contactId", async (req, res, next) => {
+  const { body } = req;
+  const { contactId } = req.params;
 
   try {
     const { error } = joiSchema.validate(body);
@@ -76,14 +84,14 @@ router.put("/:id", async (req, res, next) => {
       // throw new CreateError(400, "missing fields");
     }
 
-    // const updateContact = await contactsOperations.updateContactById(
-    //   id,
-    //   body
-    // );
-    const updateContact = await contactsOperations.updateContactById({
-      id,
-      ...body,
-    });
+    const updateContact = await contactsOperations.updateContactById(
+      contactId,
+      body
+    );
+    // const updateContact = await contactsOperations.updateContactById({
+    //   contactId,
+    //   ...body,
+    // });
 
     if (!updateContact) {
       throw new NotFound();
@@ -95,11 +103,12 @@ router.put("/:id", async (req, res, next) => {
   }
 });
 
-router.delete("/:id", async (req, res, next) => {
-  const { id } = req.params;
+// удалить
+router.delete("/:contactId", async (req, res, next) => {
+  const { contactId } = req.params;
 
   try {
-    const deleteContact = await contactsOperations.removeContactById(id);
+    const deleteContact = await contactsOperations.removeContactById(contactId);
 
     if (!deleteContact) {
       throw new NotFound();

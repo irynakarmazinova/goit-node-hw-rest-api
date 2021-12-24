@@ -1,23 +1,22 @@
 const { v4 } = require("uuid");
+// const { randomUUID } = require("crypto"); //встроенный модуль для генерации id
 
 const fs = require("fs/promises");
 
-const dotenv = require("dotenv");
-dotenv.config();
-// require("dotenv").config();
-
-const contactsPath = require("./contactsPath");
+const FILE_PATH = require("./contactsPath");
 
 const listContacts = async () => {
-  const data = await fs.readFile(contactsPath);
-  const contacts = JSON.parse(data);
-  // const contacts = JSON.parse(await fs.readFile(contactsPath));
+  const contacts = JSON.parse(await fs.readFile(FILE_PATH));
+  // const data = await fs.readFile(FILE_PATH);
+  // const contacts = JSON.parse(data);
+
   return contacts;
 };
 
-const getContactById = async (id) => {
+const getContactById = async (contactId) => {
   const contact = await listContacts();
-  const result = contact.find((item) => item.id === id);
+  const result = contact.find(({ id }) => id === contactId);
+  // const result = contact.find(({ id }) => String(id) === contactId);
 
   if (!result) {
     return null;
@@ -27,11 +26,7 @@ const getContactById = async (id) => {
 };
 
 const updateContacts = async (contacts) => {
-  try {
-    await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
-  } catch (error) {
-    console.error(error);
-  }
+  await fs.writeFile(FILE_PATH, JSON.stringify(contacts, null, 2));
 };
 
 const addContact = async (body) => {
@@ -41,30 +36,31 @@ const addContact = async (body) => {
   contacts.push(newContact);
 
   await updateContacts(contacts);
-  //   fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
+  //   fs.writeFile(FILE_PATH, JSON.stringify(contacts, null, 2));
 
   return newContact;
 };
 
-// const updateContactById = async (id, body) => {
-const updateContactById = async ({ id, name, email, phone }) => {
+const updateContactById = async (contactId, body) => {
+  // const updateContactById = async ({ contactId, name, email, phone }) => {
   const contacts = await listContacts();
-  const idx = contacts.findIndex((item) => item.id === id);
+  const idx = contacts.findIndex(({ id }) => id === contactId);
 
   if (idx === -1) {
     return null;
   }
 
-  // contacts[idx] = { ...body };
-  contacts[idx] = { id, name, email, phone };
+  contacts[idx] = { id: contactId, ...body };
+  // contacts[idx] = { ...contacts[idx], ...body };
+  // contacts[idx] = { id: contactId, name, email, phone };
   await updateContacts(contacts);
   return contacts[idx];
 };
 
-const removeContactById = async (id) => {
+const removeContactById = async (contactId) => {
   const contacts = await listContacts();
-  //   const updateContacts = contacts.filter(({ id }) => id !== id);
-  const idx = contacts.findIndex((item) => item.id === id);
+  //   const updateContacts = contacts.filter(({ id }) => id !== contactId);
+  const idx = contacts.findIndex(({ id }) => id === contactId);
 
   if (idx === -1) {
     return null;
