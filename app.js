@@ -6,6 +6,10 @@ const cors = require("cors");
 require("dotenv").config();
 
 const { contactsRouter } = require("./routes/api/contactsRouter");
+const {
+  errorHandlerNotFound,
+  errorHandlerServerError,
+} = require("./src/helpers/apiHelpers");
 
 const app = express();
 
@@ -18,13 +22,8 @@ app.use(express.json());
 app.use("/api/contacts", contactsRouter);
 
 // порядок подключаемого промежуточного ПО имеет значение. В конце приложения идет обработка ошибок. Вначале происходит обработка несуществующего роута или ошибка 404
-app.use((req, res) => {
-  res.status(404).json({ message: "Not found" });
-});
+app.use(errorHandlerNotFound);
 
-app.use((err, req, res, next) => {
-  const { status = 500, message = "Server error" } = err;
-  res.status(status).json({ message });
-});
+app.use(errorHandlerServerError);
 
 module.exports = app;
