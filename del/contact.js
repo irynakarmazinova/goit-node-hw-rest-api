@@ -1,7 +1,9 @@
 const { v4 } = require("uuid");
-// const { randomUUID } = require("crypto"); //встроенный модуль для генерации id
+// const { randomUUID } = require("crypto"); // встроенный модуль для генерации id
 
 const fs = require("fs/promises");
+
+// const { Contact } = require("../model/contactModel");
 
 const FILE_PATH = require("./contactsPath");
 
@@ -13,7 +15,7 @@ const listContacts = async () => {
   return contacts;
 };
 
-const getContactById = async (contactId) => {
+const getOneContactById = async (contactId) => {
   const contact = await listContacts();
   const result = contact.find(({ id }) => id === contactId);
   // const result = contact.find(({ id }) => String(id) === contactId);
@@ -29,7 +31,8 @@ const updateContacts = async (contacts) => {
   await fs.writeFile(FILE_PATH, JSON.stringify(contacts, null, 2));
 };
 
-const addContact = async (body) => {
+const addOneContact = async (body) => {
+  // const newContact = { id: randomUUID(), ...body };
   const newContact = { id: v4(), ...body };
   const contacts = await listContacts();
 
@@ -57,6 +60,10 @@ const updateContactById = async (contactId, body) => {
   return contacts[idx];
 };
 
+const updateStatusContact = async (contactId, body) => {
+  // const contacts = await listContacts();
+};
+
 const removeContactById = async (contactId) => {
   const contacts = await listContacts();
   //   const updateContacts = contacts.filter(({ id }) => id !== contactId);
@@ -77,8 +84,9 @@ const removeContactById = async (contactId) => {
 
 module.exports = {
   listContacts,
-  getContactById,
-  addContact,
+  getOneContactById,
+  addOneContact,
   updateContactById,
+  updateStatusContact,
   removeContactById,
 };
