@@ -36,8 +36,11 @@ const getContactByIdController = async (req, res, next) => {
 const addContactController = async (req, res, next) => {
   try {
     const { body } = req;
+    // const { name, email, phone } = req.body;
 
     const newContact = await addContact(body);
+    // const newContact = await addContact({ name, email, phone });
+
     res.status(201).json(newContact);
   } catch (error) {
     if (error.message.includes("validation failed")) {

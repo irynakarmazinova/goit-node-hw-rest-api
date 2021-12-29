@@ -3,9 +3,8 @@
 // const createError = require("http-errors");
 const { NotFound, BadRequest } = require("http-errors");
 
-const { Contact } = require("../models");
-
 const { joiSchema } = require("../models/contactModel");
+const { Contact } = require("../models");
 
 const getContacts = async () => {
   const contacts = await Contact.find({}, "_id name email phone favorite");
@@ -34,6 +33,7 @@ const addContact = async (body) => {
   }
 
   const newContact = await Contact.create(body);
+
   return newContact;
 };
 
