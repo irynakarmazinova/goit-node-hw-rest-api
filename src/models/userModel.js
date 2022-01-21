@@ -11,14 +11,12 @@ const joiSignupSchema = Joi.object({
   email: Joi.string().pattern(emailRegexp).required(),
   password: Joi.string().min(6).required(),
   subscription: Joi.string(),
-  // token: Joi.boolean(),
 });
 const joiLoginSchema = Joi.object({
   // name: Joi.string().min(2).max(30).required(),
   email: Joi.string().pattern(emailRegexp).required(),
   password: Joi.string().min(6).required(),
   subscription: Joi.string(),
-  token: Joi.boolean(),
 });
 
 const userSchema = Schema(
@@ -46,10 +44,6 @@ const userSchema = Schema(
     token: {
       type: String,
       default: null,
-    },
-    owner: {
-      // type: SchemaTypes.ObjectId,
-      // ref: "user",
     },
   },
   { versionKey: false, timestamps: true }

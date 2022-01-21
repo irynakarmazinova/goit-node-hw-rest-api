@@ -2,6 +2,7 @@ const { Router } = require("express");
 const router = Router();
 
 // const { asyncWrapper } = require("../../src/helpers/apiHelpers");
+const { authenticate } = require("../../src/middlewares");
 
 // const contactsControllers = require("../../controllers");
 const {
@@ -15,23 +16,23 @@ const {
 
 // получить все
 // app.use("/api/contacts/...
-router.get("/", getContactsController);
+router.get("/", authenticate, getContactsController);
 
 // получить по id
 // app.use("/api/contacts/id...
-router.get("/:contactId", getContactByIdController);
+router.get("/:contactId", authenticate, getContactByIdController);
 // router.get("/", asyncWrapper(getContactByIdController));
 
 // добавить
-router.post("/", addContactController);
+router.post("/", authenticate, addContactController);
 
 // обновить
-router.put("/:contactId", changeContactController);
+router.put("/:contactId", authenticate, changeContactController);
 
 // обновить частично
-router.patch("/:contactId/favorite", patchContactController);
+router.patch("/:contactId/favorite", authenticate, patchContactController);
 
 // удалить
-router.delete("/:contactId", deleteContactController);
+router.delete("/:contactId", authenticate, deleteContactController);
 
 module.exports = { contactsRouter: router };

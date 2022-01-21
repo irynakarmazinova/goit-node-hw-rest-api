@@ -1,20 +1,47 @@
-const { signout, login, logout, current } = require("../services/authService");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { BadRequest, Conflict, Unauthorized } = require("http-errors");
+
+const { joiSignupSchema, joiLoginSchema } = require("../models/userModel");
+const { User } = require("../models");
+
+const { SECRET_KEY } = process.env;
 
 const signupController = async (req, res, next) => {
   try {
     const { body } = req;
     const { name, email, password, subscription } = req.body;
+    const { error } = joiSignupSchema.validate(body);
+    // body-схема проверяет соотвествует ли тело запроса тому, что написано в joiSchema
 
-    await signout(body, name, email, password, subscription);
+    if (error) {
+      throw new BadRequest(error.message);
+    }
 
-    //   как сюда передать хэшированный пароль? ньююзер?
-    //   почему не выводится по дефолту сабскрипшн?
+    const user = await User.findOne({ email });
+
+    if (user) {
+      throw new Conflict("Email in use");
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(password, salt);
+    const newUser = await User.create({
+      name,
+      email,
+      password: hashPassword,
+      subscription,
+    });
+    // const newUser = new User({ name, email });
+    // newUser.setPassword(password);
+    // const result = newUser.save();
+
     res.status(201).json({
       user: {
-        name,
-        email,
-        // password: password,
-        subscription,
+        name: newUser.name,
+        email: newUser.email,
+        // password: newUser.password,
+        subscription: newUser.subscription,
       },
     });
   } catch (error) {
@@ -25,24 +52,63 @@ const signupController = async (req, res, next) => {
 const loginController = async (req, res, next) => {
   try {
     const { body } = req;
-    const { email, password, subscription } = req.body;
+    const { email, password } = req.body;
+    const { error } = joiLoginSchema.validate(body);
 
-    const token = await login(body, email, password, subscription);
+    if (error) {
+      throw new BadRequest(error.message);
+    }
 
-    // res.status(200).json({
-    //   token: "",
-    //   user: {
-    //     email: newUser.email,
-    //     subscription: newUser.subscription,
-    //   },
-    // });
-    res.json({ status: "success", token });
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      throw new Unauthorized("Email or password is wrong");
+    }
+
+    const passwordCompare = await bcrypt.compare(password, user.password);
+    // const passwordCompare = user.comparePassword(password);
+
+    if (!passwordCompare) {
+      throw new Unauthorized("Email or password is wrong");
+    }
+
+    const { _id, subscription } = user;
+    const payload = {
+      id: _id,
+    };
+    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1h" });
+    await User.findByIdAndUpdate(_id, { token });
+
+    res.json({
+      token,
+      user: {
+        email,
+        subscription,
+      },
+    });
   } catch (error) {
     next(error);
   }
 };
-const logoutController = async (req, res, next) => {};
-const currentController = async (req, res, next) => {};
+
+const logoutController = async (req, res, next) => {
+  const { _id } = req.user;
+
+  await User.findByIdAndUpdate(_id, { token: null });
+
+  res.status(204).send();
+};
+
+const currentController = async (req, res, next) => {
+  const { email, subscription } = req.user;
+
+  res.json({
+    user: {
+      email,
+      subscription,
+    },
+  });
+};
 
 module.exports = {
   signupController,
