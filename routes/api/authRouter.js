@@ -18,7 +18,7 @@ router.post("login", loginController);
 
 router.get("/logout", authenticate, logoutController);
 
-// текущий
+// -текущий
 router.get("/current", authenticate, currentController);
 
 // router.patch("/", authenticate);

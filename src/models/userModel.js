@@ -43,6 +43,7 @@ const userSchema = Schema(
     },
     token: {
       type: String,
+      // required: false,
       default: null,
     },
   },
