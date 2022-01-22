@@ -8,11 +8,11 @@ const { Contact } = require("../models");
 
 const getContactsController = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, favorite = true } = req.query;
     const { _id } = req.user;
     const skip = (page - 1) * limit;
     const contacts = await Contact.find(
-      { owner: _id },
+      { owner: _id, favorite },
       "-createdAt -updatedAt",
       { skip, limit: +limit }
       // skip-пропустить, limit-взять
@@ -91,6 +91,10 @@ const changeContactController = async (req, res, next) => {
 
     res.json(updateContact);
   } catch (error) {
+    if (error.message.includes("Validation failed")) {
+      error.status = 400;
+    }
+
     next(error);
   }
 };
