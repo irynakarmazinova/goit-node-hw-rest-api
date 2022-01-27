@@ -1,13 +1,14 @@
 const { Router } = require("express");
 const router = Router();
 
-const { authenticate } = require("../../src/middlewares");
+const { authenticate, upload } = require("../../src/middlewares");
 
 const {
   signupController,
   loginController,
   logoutController,
   currentController,
+  updateAvatar,
 } = require("../../src/controllers/authController");
 
 // app.use("/api/auth/users/signup or register... -зарегестрироваться
@@ -21,6 +22,6 @@ router.get("/logout", authenticate, logoutController);
 // -текущий
 router.get("/current", authenticate, currentController);
 
-// router.patch("/", authenticate);
+router.patch("/avatars", authenticate, upload.single("avatar"), updateAvatar);
 
 module.exports = { authRouter: router };
